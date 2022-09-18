@@ -1,0 +1,21 @@
+<html><body><p></p><div class="alert alert-warning">This problem is fully supported by version 2021.9 of the EduTools plugin and newer. To avoid possible errors, please make sure that the plugin is updated. Alternatively, you can solve it using the web interface.</div><p></p>
+<p>The program has one <code class="language-json">POST</code> endpoint that receives a task as a JSON object with two fields: <code class="language-json">name</code> (string) and <code class="language-json">description</code> (string).</p>
+<p>Your task is to analyze the code and make some changes so that the program would only accept the tasks that meet the following requirements:</p>
+<ul>
+<li>The length of the <code class="language-json">name</code> must be from 1 to 50 inclusive.</li>
+<li>The length of the <code class="language-json">description</code> must be from 1 to 200 inclusive.</li>
+<li>Both fields must not be blank.</li>
+</ul>
+<p>If these requirements are met, the program should respond with <code class="language-json">200 OK</code> status code, otherwise <code class="language-json">400 Bad Request</code>.</p>
+<p><strong>Example 1</strong>: <code class="language-json">POST /tasks</code> request with the following body:</p>
+<pre><code class="language-json">{
+   "name": "task1",
+   "description": "abc"
+}</code></pre>
+<p>Status code: <code class="language-json">200 OK</code></p>
+<p><strong>Example 2</strong>: <code class="language-json">POST /tasks</code> request with the following body:</p>
+<pre><code class="language-json">{
+   "name": "",
+   "description": "a"
+}</code></pre>
+<p>Status code: <code class="language-json">400 Bad Request</code></p></body></html>

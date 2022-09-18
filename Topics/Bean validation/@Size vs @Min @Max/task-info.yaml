@@ -1,0 +1,26 @@
+type: choice
+is_multiple_choice: true
+options:
+- text: If the field is annotated with @Size is a String, the size of the string is
+    evaluated
+- text: If the field is annotated with @Size is an int, the number of digits is evaluated
+- text: If the field is annotated with @Max is a String, the size of the string is
+    evaluated
+- text: If the field is annotated with @Min is an int, field value should be greater
+    or equal to the min number
+files:
+- name: src/Task.java
+  visible: true
+  text: |
+    // You can experiment here, it won’t be checked
+
+    public class Task {
+      public static void main(String[] args) {
+        // put your code here
+      }
+    }
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/9358#comment
+status: Solved
+record: -1
+local_check: false

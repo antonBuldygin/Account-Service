@@ -1,0 +1,116 @@
+<h2>Bean validation</h2>
+<html><body><h5 id="data-validation">Data validation</h5>
+<p>As you have learned, in web-based applications, a client can communicate with the server. It means that a client can request data from a server as well as send data to it. The question is: what if a user sends data that violates the business logic of the application? For example, the user can specify a negative age or empty name while filling a registration form. As it could lead to unexpected errors, we need to prevent a situation where a user sends data that violates <strong>specified constraints</strong>. In cases like that, we can use annotations from the <code class="language-json">javax.validation</code> package together with Spring Boot annotations.</p>
+<p>Here's an example. Imagine you are creating a web application for special agents registration, so now users can send data to the server using the <code class="language-json">POST</code> HTTP request method with a request body that contains data about special agents:</p>
+<pre><code class="language-json">{
+    "name": "James",
+    "surname": "Bond",
+    "code": "007",
+    "status": "special agent",
+    "age": 51
+}</code></pre>
+<p>Data in the request body represents a POJO class <code class="language-json">SpecialAgent</code>:</p>
+<pre><code class="language-java">public class SpecialAgent {
+
+    private String name;
+    private String surname;
+    private String code;
+    private String status;
+    private int age;
+    
+    // getters and setters
+}</code></pre>
+<p>Now we can set constraints for the fields of the <code class="language-json">SpecialAgent</code> class using annotations from the <code class="language-json">javax.validation</code> package.</p>
+<p>To start using this package in your Spring Boot application, you need to add a particular dependency.</p>
+<pre><code class="language-no-highlight">implementation 'org.springframework.boot:spring-boot-starter-validation'</code></pre>
+<p>If you prefer using Maven to Gradle, you can <a href="https://javalibs.com/artifact/org.springframework.boot/spring-boot-starter-validation" rel="noopener noreferrer nofollow" target="_blank">check out the dependency here</a>.</p>
+<h5 id="notnull-notempty-notblank-constraints">@NotNull, @NotEmpty, @NotBlank constraints</h5>
+<p><code class="language-json">@NotNull</code> annotation is one of the most popular constraint annotations, and it declares that a <em>field cannot be null</em>.</p>
+<p> </p>
+<p>All constraint annotations should be placed on top of the data class fields.</p>
+<p> </p>
+<p>Let's annotate a special agent's name with <code class="language-json">@NotNull</code>:</p>
+<pre><code class="language-java">@NotNull
+private String name;</code></pre>
+<p>Now special agent's data that we will send to the server should contain a field <code class="language-json">name</code> and should not be <code class="language-json">null</code>. Besides <code class="language-json">@NotNull</code> annotation, we can use <code class="language-json">@NotEmpty</code> and <code class="language-json">@NotBlank</code> annotations. <code class="language-json">@NotEmpty</code> annotation declares that an annotated field <em>should not be null</em><strong>, </strong>and the length of the field value should be <em>greater than 0</em>. <code class="language-json">@NotBlank</code> declares that annotated field value should<strong> </strong><em>not be empty after trimming. </em>Let's have a look at some examples:</p>
+<pre><code class="language-java">@NotEmpty
+private String motto;
+
+@NotBlank
+private String status;</code></pre>
+<p>The values of the <code class="language-json">motto</code> and <code class="language-json">status</code> fields cannot be <code class="language-json">null</code> and cannot be empty. However, <code class="language-json">motto</code> value can be equal to <code class="language-json">" "</code> unlike <code class="language-json">status</code>, whose trimmed value cannot be empty.</p>
+<h5 id="size-constraint">@Size constraint</h5>
+<p>The next useful constraints are provided by <code class="language-json">@Size</code> annotation. This annotation has <code class="language-json">"min = "</code> and <code class="language-json">"max = "</code> parameters that specify the <em>boundaries of the field</em><strong> </strong>(constrain the length)<strong>.</strong></p>
+<pre><code class="language-java">@Size(min = 1, max = 3)
+private String code;</code></pre>
+<p>Now, a special agent's <code class="language-json">code</code> can contain from one to three symbols. <code class="language-json">@Size</code> annotation can be used not only for <code class="language-json">String</code> fields but also for <code class="language-json">Collection</code> fields. It specifies the <em>minimum and the maximum number of elements in the collection</em>. For example, let's constrain the number of special agent's cars to be from 0 to 4:</p>
+<pre><code class="language-java">@Size(min = 0, max = 4)
+private List&lt;String&gt; cars;</code></pre>
+<h5 id="min-max-constraints">@Min, @Max constraints</h5>
+<p>If we want to set boundaries for the <em>numeric value</em>, we can use <code class="language-json">@Min</code> and <code class="language-json">@Max</code> annotations with the <code class="language-json">"value = "</code> parameter. We can omit the <code class="language-json">"value = "</code> parameter name and specify the integer number only:</p>
+<pre><code class="language-java">@Min(value = 18)
+private int age;
+
+@Max(5)
+private int numberOfCurrentMissions;</code></pre>
+<p>Now a special agents' minimum age is 18, and they cannot have more than 5 current missions.</p>
+<h5 id="pattern-and-email">@Pattern and @Email</h5>
+<p>Another useful annotation is <code class="language-json">@Pattern</code> that constrains the value of the annotated field <em>to match the regular expression</em> defined in the <code class="language-json">"regexp = "</code> parameter. For example, we would like to specify that a special agent's <code class="language-json">code</code> can contain from 1 to 3 digits only:</p>
+<pre><code class="language-java">@Pattern(regexp = "[0-9]{1,3}")
+private String code;</code></pre>
+<p>Let's add an <code class="language-json">email</code> field to the <code class="language-json">SpecialAgent</code> class. We know that email address is made up of a local-part, an @ symbol, then a case-insensitive domain. We can write a regular expression for the email address validation or use a special case of the <code class="language-json">@Pattern</code> , <code class="language-json">@Email</code> annotation, which approves that the annotated property is a<strong> </strong><em>valid email address</em>.</p>
+<pre><code class="language-java">@NotNull
+@Email
+private String email;</code></pre>
+<h5 id="valid-annotation">@Valid annotation</h5>
+<p>Now we have a <code class="language-json">SpecialAgent</code> class with fields that are constrained by annotations. To allow a client to communicate with a server, we can create a REST Controller with annotated <code class="language-json">@PostMapping</code> methods and <code class="language-json">@RequestBody</code> parameters. However, we need to add <code class="language-json">@Valid</code> annotation from <code class="language-json">javax.validation</code> package to the <strong>request body</strong> parameter to "tell" Spring Boot that<strong> </strong>request body must be<strong> validated</strong> according to the specified annotations. Without this annotation, <code class="language-json">SpecialAgent</code> class properties will not be validated.</p>
+<pre><code class="language-java">@RestController
+public class SpecialAgentController {
+
+    @PostMapping("/agent")
+    public ResponseEntity&lt;String&gt; validate(@Valid @RequestBody SpecialAgent agent) {
+        return ResponseEntity.ok("Agent info is valid.");
+    }
+}</code></pre>
+<p>Great, we've annotated the <code class="language-json">agent</code> parameter of the POST method by <code class="language-json">@Valid</code> annotation, so now the agent's data will be validated. What happens if we send data that violates the constraints? The server will return an HTTP response with a <code class="language-json">400 Bad Request</code> status and the body that contains a field <code class="language-json">"defaultMessage"</code> with a description of the violated constraint. However, we can customize this message by specifying the <code class="language-json">"message = "</code> parameter of the constraint annotation.</p>
+<p> </p>
+<p>Any validation annotation has a <code class="language-json">"message = "</code> parameter that can be used to display validation failures messages.</p>
+<p> </p>
+<p>For example, let's add a <code class="language-json">"message = "</code> to the <code class="language-json">@Min</code> annotation of the field <code class="language-json">age</code>:</p>
+<pre><code class="language-java">@Min(value = 18, message = "Age must be greater than or equal to 18")
+private int age;</code></pre>
+<p>If we try to send special agent's data and specify the value of the field <code class="language-json">age</code> lower than 18, our application will return a response with a <code class="language-json">400 Bad Request</code> status and the body that contains a field <code class="language-json">"defaultMessage": "Age must be greater than or equal to 18"</code>.</p>
+<h5 id="validated-annotation">@Validated annotation</h5>
+<p>We can validate not only request body but also <strong>path variables</strong> and <strong>request parameters</strong>. To do so, we should annotate the REST Controller class with <code class="language-json">@Validated</code> annotation. Now we can use the same annotations that were already described together with the <code class="language-json">@PathVariable</code> or <code class="language-json">@RequestParam</code> annotations. Here's an example:</p>
+<pre><code class="language-java">@RestController
+@Validated
+public class SpecialAgentController {
+
+    @GetMapping("/agents/{id}")
+    ResponseEntity&lt;String&gt; validateAgentPathVariable(@PathVariable("id") @Min(1) int id) {
+        return ResponseEntity.ok("Agent id is valid.");
+    }
+
+    @GetMapping("/agents")
+    ResponseEntity&lt;String&gt; validateAgentRequestParam(
+            @RequestParam("code") @Pattern(regexp = "[0-9]{1,3}") String code) {
+        return ResponseEntity.ok("Agent code is valid.");
+    }
+}</code></pre>
+<p>We have constrained a path variable <code class="language-json">id</code> with a <code class="language-json">@Min(1)</code> annotation. It means that <code class="language-json">id</code> cannot be lower than 1. Besides a path variable, we have constrained a request parameter <code class="language-json">code</code> with a <code class="language-json">@Pattern(regexp = "[0-9]{1,3}")</code> annotation. It means that <code class="language-json">code</code> can consist of 1 to 3 digits only.</p>
+<p> </p>
+<p>The <code class="language-json">@Validated</code> annotation will cause a <code class="language-json">ConstraintViolationException</code> if there is a validation of <code class="language-json">@PathVariable</code> fails with and this exception will be mapped to the HTTP status code <strong>500 (Internal Server Error)</strong>. If you would like to return a HTTP status <strong>400</strong>, you must add a custom exception handler to the rest controller. <a href="https://github.com/spring-projects/spring-boot/issues/10471" rel="noopener noreferrer nofollow" target="_blank">Here is the description of this issue</a>.</p>
+<p> </p>
+<p>Adding <code class="language-json">@Validated</code> to the rest controller class also enables us to validate a list of objects that have constraints. Let's return to the <code class="language-json">SpecialAgent</code> example from the previous paragraph:</p>
+<pre><code class="language-java">@RestController
+@Validated
+public class SpecialAgentController {
+
+    @PostMapping("/agent")
+    public ResponseEntity&lt;String&gt; validate(@RequestBody List&lt;@Valid SpecialAgent&gt; agents) {
+        return ResponseEntity.ok("All agents have valid info.");
+    }
+}</code></pre>
+<p>In this case, evaluation of constraints of every <code class="language-json">SpecialAgent</code> object in the list will be triggered, and if the evaluation fails, a <code class="language-json">ConstraintViolationException</code> will be thrown that you might want to handle.</p>
+<h5 id="conclusion">Conclusion</h5>
+<p>Now you know how to validate data that a client sends to the server. To constrain the class field, we need to annotate it with annotations from the <code class="language-json">javax.validation</code> package. To validate sent data following specified constraints, we need to add the <code class="language-json">@Valid</code> annotation to the request body parameter of the corresponding <code class="language-json">POST</code> method in the controller class. We can validate not only request body but also path variables and request parameters. To do so, we can add the <code class="language-json">@Validated</code> annotation to the REST Controller class and use any constraint annotation from the <code class="language-json">javax.validation</code> package together with the path variable or request parameter of the method.</p></body></html>

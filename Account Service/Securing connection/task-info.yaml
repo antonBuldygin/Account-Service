@@ -1,0 +1,2347 @@
+type: edu
+files:
+- name: build.gradle
+  visible: true
+  text: |-
+    plugins {
+        id 'java'
+        id 'org.springframework.boot' version '2.3.1.RELEASE'
+        id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceSets.main.resources.srcDirs = ["src/resources"]
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation group: 'org.hibernate', name: 'hibernate-validator', version: '6.1.0.Final'
+    }
+  learner_created: false
+- name: src/account/AccountServiceApplication.java
+  visible: true
+  text: |-
+    package account;
+
+    import org.springframework.boot.SpringApplication;
+    import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+    @SpringBootApplication
+    public class AccountServiceApplication {
+
+        public static void main(String[] args) {
+            SpringApplication.run(AccountServiceApplication.class, args);
+        }
+
+    }
+  learner_created: false
+- name: src/resources/application.properties
+  visible: true
+  text: |-
+    server.port=28852
+    management.endpoints.web.exposure.include=*
+    management.endpoint.shutdown.enabled=true
+    spring.jackson.serialization.INDENT_OUTPUT=true
+  learner_created: false
+- name: test/AccountServiceTest.java
+  visible: false
+  text: |
+    import account.AccountServiceApplication;
+    import org.hyperskill.hstest.dynamic.DynamicTest;
+    import org.hyperskill.hstest.dynamic.input.DynamicTesting;
+    import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+    import org.hyperskill.hstest.mocks.web.request.HttpRequest;
+    import org.hyperskill.hstest.stage.SpringTest;
+    import org.hyperskill.hstest.testcase.CheckResult;
+
+    import javax.net.ssl.*;
+    import java.security.cert.X509Certificate;
+
+    public class AccountServiceTest extends SpringTest {
+      public AccountServiceTest() {
+        super(AccountServiceApplication.class, "../service_db.mv.db");
+      }
+
+      SSLSocket socket;
+      java.security.cert.X509Certificate[] chain;
+
+      // Warning!!! Only for testing reason, trust all certificates!
+      TrustManager[] trustAllCerts = new TrustManager[] {
+              new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                  return new java.security.cert.X509Certificate[0];
+                }
+                public void checkClientTrusted(
+                        java.security.cert.X509Certificate[] certs, String authType) {
+                }
+                public void checkServerTrusted(
+                        java.security.cert.X509Certificate[] certs, String authType) {
+                }
+              }
+      };
+
+      // Test SSL
+      public CheckResult checkCertificateName(String nameCN) {
+        try {
+          SSLContext sc = SSLContext.getInstance("SSL");
+          //ТАК нельзя!!! доверяем всем сертификатам, только для тестирования и разработки!!!
+          sc.init(null, trustAllCerts, new java.security.SecureRandom());
+          SSLSocketFactory factory = sc.getSocketFactory();
+          HttpRequest request = get("");
+          socket = (SSLSocket) factory.createSocket(request.getHost(), request.getPort());
+          getCertificates();
+          if (findCert(nameCN)) {
+            return CheckResult.correct();
+          } else {
+            throw new WrongAnswer("Not found certificate with CN - " + nameCN);
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+          System.out.println("Connection not found");
+          throw new WrongAnswer("Can't establish https connection!");
+        }
+      }
+
+      // Get certificate chain
+      public void getCertificates() {
+        try {
+          chain = (X509Certificate[]) socket.getSession().getPeerCertificates();
+        } catch (SSLPeerUnverifiedException e) {
+          e.printStackTrace();
+          System.out.println(e.toString());
+        }
+      }
+
+
+      // Searching certificate by Common Name
+      public boolean findCert(String subject) {
+        for (java.security.cert.X509Certificate c : chain) {
+          String subjectName = c.getSubjectDN().getName();
+          System.out.println(subjectName + " " + c.getSigAlgName());
+          if (subjectName.contains("CN=" + subject)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      @DynamicTest
+      DynamicTesting[] dt = new DynamicTesting[]{
+
+              // Check certificate name
+              () -> checkCertificateName("accountant_service"),
+      };
+    }
+  learner_created: false
+- name: src/account/Log.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.stereotype.Component;
+
+    import javax.persistence.*;
+    import javax.validation.constraints.NotEmpty;
+    import javax.validation.constraints.NotNull;
+
+    @Component
+    @Entity
+    @Table(name = "log")
+    public class Log {
+
+       public Long getId() {
+          return id;
+       }
+
+       public void setId(Long id) {
+          this.id = id;
+       }
+
+       @Id
+       @GeneratedValue(strategy = GenerationType.SEQUENCE)
+       @Column(name = "id", nullable = false)
+       private Long id;
+
+       @Column(name = "date")
+       @NotNull
+       @NotEmpty
+       String  date;
+
+       @Column(name = "action")
+       @NotNull
+       @NotEmpty
+       String action;
+
+       @Column(name = "subject")
+       @NotNull
+       @NotEmpty
+       String subject;
+
+       @Column(name = "object")
+       @NotNull
+       @NotEmpty
+       String object;
+
+       @Column(name = "path")
+       @NotNull
+       @NotEmpty
+       String path;
+
+       public Log(String date, String action, String subject, String object, String path) {
+          this.date = date;
+          this.action = action;
+          this.subject = subject;
+          this.object = object;
+          this.path = path;
+       }
+
+       public Log() {
+       }
+
+       public String getDate() {
+          return date;
+       }
+
+       public void setDate(String date) {
+          this.date = date;
+       }
+
+       public String getAction() {
+          return action;
+       }
+
+       public void setAction(String action) {
+          this.action = action;
+       }
+
+       public String getSubject() {
+          return subject;
+       }
+
+       public void setSubject(String subject) {
+          this.subject = subject;
+       }
+
+       public String getObject() {
+          return object;
+       }
+
+       public void setObject(String object) {
+          this.object = object;
+       }
+
+       public String getPath() {
+          return path;
+       }
+
+       public void setPath(String path) {
+          this.path = path;
+       }
+    }
+  learner_created: true
+- name: src/account/CustomAccessDeniedHandler.java
+  visible: true
+  text: |
+    package account;
+
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.security.access.AccessDeniedException;
+    import org.springframework.security.core.AuthenticationException;
+    import org.springframework.security.web.access.AccessDeniedHandler;
+    import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+    import javax.servlet.ServletException;
+    import javax.servlet.http.HttpServletRequest;
+    import javax.servlet.http.HttpServletResponse;
+    import java.io.IOException;
+    import java.io.OutputStream;
+    import java.time.LocalDate;
+    import java.time.LocalDateTime;
+    import java.time.format.DateTimeFormatter;
+    import java.util.*;
+
+    public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+        @Autowired
+        LogRepository logRepository;
+
+        @Override
+        public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+                           AccessDeniedException e) throws IOException, ServletException {
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+            String date = LocalDateTime.now().format(dateTimeFormatter);
+            Enumeration en = httpServletRequest.getHeaderNames();
+
+            String code = new String();
+
+            while (en.hasMoreElements()) {
+                //get header name Accept,Accept-Charset,Authorization,Connection,Host etc.
+                String headerName = (String) en.nextElement(); //nextElement() returns Object need type cast
+                //get the value of the headerName
+                String headerValue = httpServletRequest.getHeader(headerName);
+                if (headerValue.contains("Basic")) {
+                    code = headerValue;
+                }
+
+            }
+            String email = new String();
+            if(code.length()>0)
+            {code = code.substring(6, code.length()).trim();
+
+                byte[] decodedBytes = Base64.getDecoder().decode(code);
+                String decodedString = new String(decodedBytes);
+                String[] ar = decodedString.split(":");
+
+                email =decodedString.equals(":")?"null": ar[0] ==""? "null":ar[0];
+                logRepository.save(new Log(date, "ACCESS_DENIED", email, httpServletRequest.getRequestURI(), httpServletRequest.getRequestURI()));}
+            else  {email= "null";}
+
+            Map<String,Object> response = new HashMap<>();
+            response.put("status", 403);
+            response.put("error", "Forbidden");
+            response.put("message","Access Denied!");
+            response.put("time", Calendar.getInstance().getTime());
+            response.put("path", httpServletRequest.getRequestURI());
+
+            httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    //        httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            OutputStream out = httpServletResponse.getOutputStream();
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writerWithDefaultPrettyPrinter().writeValue(out,response);
+            //mapper.writeValue(out, response);
+
+            out.flush();
+        }
+        }
+  learner_created: true
+- name: src/account/UserDetailsServiceImpl.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.security.core.userdetails.UserDetails;
+    import org.springframework.security.core.userdetails.UserDetailsService;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
+    import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.stereotype.Service;
+    import org.springframework.web.server.ResponseStatusException;
+
+    import javax.persistence.EntityManager;
+    import javax.persistence.PersistenceContext;
+    import java.util.Optional;
+
+    @Service
+    public class UserDetailsServiceImpl implements UserDetailsService {
+        public static final int MAX_FAILED_ATTEMPTS = 5;
+        @Autowired
+        UserRepository userRepository;
+
+        User user;
+
+        public User getUser() {
+            return user;
+        }
+
+        @Override
+        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+            if (username == null) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Can't remove ADMINISTRATOR role!");
+            }
+            if (username.equals("")) {throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Can't remove ADMINISTRATOR role!");
+        }
+
+
+            String emailLower = username.toLowerCase();
+
+            Optional<User> check = userRepository.findByEmail(emailLower);
+            if (check.isPresent()) {
+                user = check.get();
+            } else {
+                throw new UsernameNotFoundException("Not found: " + username);
+            }
+
+            return new UserDetailsImpl(user);
+        }
+
+        public void increaseFailedAttempts() {
+            int newFailAttempts = user.getFailedAttempt() + 1;
+            user.setFailedAttempt(newFailAttempts);
+           userRepository.save(user);
+        }
+
+        public void resetFailedAttempts() {
+
+            user.setFailedAttempt(0);
+            userRepository.save(user);
+        }
+
+        public void lock() {
+            user.setAccountNonLocked(false);
+
+            userRepository.save(user);
+        }
+
+    }
+  learner_created: true
+- name: src/account/GroupRepository.java
+  visible: true
+  text: |+
+    package account;
+
+    import org.springframework.data.repository.CrudRepository;
+    import org.springframework.stereotype.Component;
+
+    import java.util.List;
+    import java.util.Optional;
+
+    @Component
+    public interface GroupRepository extends CrudRepository<Group, Long> {
+
+            Optional<Group> findByRole(String name);
+
+
+
+        }
+
+  learner_created: true
+- name: src/account/LogRepository.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.data.repository.CrudRepository;
+    import org.springframework.stereotype.Component;
+
+    import java.util.Optional;
+
+    @Component
+    public interface LogRepository  extends CrudRepository<Log, Long> {
+
+            Iterable<Log> findAll();
+
+    }
+  learner_created: true
+- name: src/account/CustomLoginFailureHandler.java
+  visible: true
+  text: |-
+    //package account;
+    //
+    //import org.springframework.beans.factory.annotation.Autowired;
+    //import org.springframework.security.authentication.LockedException;
+    //import org.springframework.security.core.AuthenticationException;
+    //import org.springframework.security.core.userdetails.UserDetails;
+    //import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+    //import org.springframework.stereotype.Component;
+    //
+    //import javax.servlet.ServletException;
+    //import javax.servlet.http.HttpServletRequest;
+    //import javax.servlet.http.HttpServletResponse;
+    //import java.io.IOException;
+    //import java.util.Optional;
+    //
+    //@Component
+    //public class CustomLoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+    //
+    //    @Autowired
+    //    private UserDetailsServiceImpl userService;
+    //
+    //    @Override
+    //    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+    //                                        AuthenticationException exception) throws IOException, ServletException {
+    //        String email = request.getParameter("email");
+    //        UserDetails user = userService.loadUserByUsername(email);
+    //
+    //        if (user != null) {
+    //            if (user.isAccountNonLocked()) {
+    //                if (userService.getUser().getFailedAttempt() < UserDetailsServiceImpl.MAX_FAILED_ATTEMPTS - 1) {
+    //                    userService.increaseFailedAttempts();
+    //                } else {
+    //                    userService.lock();
+    //                    exception = new LockedException("Your account has been locked due to 3 failed attempts."
+    //                            + " It will be unlocked after 24 hours.");
+    //                }
+    //            }
+    //
+    //        }
+    //
+    //
+    //        super.onAuthenticationFailure(request, response, exception);
+    //    }
+    //
+    //}
+  learner_created: true
+- name: src/account/CustomErrorMessage.java
+  visible: true
+  text: |
+    package account;
+
+    import java.time.LocalDateTime;
+
+    public class CustomErrorMessage {
+        private int status;
+        private LocalDateTime timestamp;
+        private String message;
+        private String description;
+    }
+  learner_created: true
+- name: src/account/ControllerExceptionHandler.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.http.HttpHeaders;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
+    import org.springframework.web.bind.MethodArgumentNotValidException;
+    import org.springframework.web.bind.annotation.ControllerAdvice;
+    import org.springframework.web.bind.annotation.ExceptionHandler;
+    import org.springframework.web.bind.annotation.ResponseStatus;
+    import org.springframework.web.context.request.WebRequest;
+    import org.springframework.web.servlet.NoHandlerFoundException;
+    import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+    import javax.servlet.http.HttpServletResponse;
+    import javax.validation.ConstraintViolationException;
+    import java.io.IOException;
+    import java.time.LocalDateTime;
+    import java.util.LinkedHashMap;
+    import java.util.Map;
+
+    @ControllerAdvice
+    public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
+
+        @ExceptionHandler(ConstraintViolationException.class)
+        public void constraintViolationException(HttpServletResponse response) throws IOException {
+            response.sendError(HttpStatus.NOT_FOUND.value(),"User not found!");
+        }
+        protected ResponseEntity<Object> handleMethodArgumentNotValid(
+                MethodArgumentNotValidException ex,
+                HttpHeaders headers,
+                HttpStatus status,
+                WebRequest request) {
+
+            // Just like a POJO, a Map is also converted to a JSON key-value structure
+            Map<String, Object> body = new LinkedHashMap<>();
+
+            body.put("timestamp", LocalDateTime.now());
+            body.put("status", status.value());
+            body.put("error", "Bad Request");
+            body.put("message", "Password length must be 12 chars minimum!");
+            body.put("path", "api/auth/signup");
+            return new ResponseEntity<>(body, headers, status);
+        }
+
+
+
+    }
+  learner_created: true
+- name: src/account/AccountController.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.http.MediaType;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.security.access.annotation.Secured;
+    import org.springframework.security.core.annotation.AuthenticationPrincipal;
+    import org.springframework.security.core.userdetails.UserDetails;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
+    import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.transaction.annotation.Transactional;
+    import org.springframework.validation.annotation.Validated;
+    import org.springframework.web.bind.annotation.*;
+    import org.springframework.web.server.ResponseStatusException;
+
+    import javax.validation.Valid;
+    import javax.validation.constraints.Pattern;
+    import java.time.LocalDate;
+    import java.time.LocalDateTime;
+    import java.time.YearMonth;
+    import java.time.format.DateTimeFormatter;
+    import java.util.*;
+    import java.util.stream.Collectors;
+
+    @RestController
+    @Validated
+    public class AccountController {
+
+        List<String> breachedPasswords = new ArrayList<>(Arrays.asList("PasswordForJanuary", "PasswordForFebruary",
+                "PasswordForMarch", "PasswordForApril",
+                "PasswordForMay", "PasswordForJune",
+                "PasswordForJuly", "PasswordForAugust",
+                "PasswordForSeptember", "PasswordForOctober",
+                "PasswordForNovember", "PasswordForDecember"));
+
+        @Autowired
+        UserRepository userRepository;
+        @Autowired
+        PasswordEncoder encoder;
+
+        @Autowired
+        PaymentsRepository paymentsRepository;
+        @Autowired
+        LogRepository logRepository;
+
+        @Autowired
+        private UserDetailsServiceImpl userService;
+
+    //    @Autowired
+    //    DataLoader dataLoader;
+
+        @Autowired
+        GroupRepository groupRepository;
+
+        List<Payments> paymentsList = new ArrayList<>();
+
+        @PutMapping(value = "api/admin/user/access", consumes = {MediaType.APPLICATION_JSON_VALUE})
+        @Secured("ROLE_ADMINISTRATOR")
+        public ResponseEntity<?> lockUnlockUser(@AuthenticationPrincipal UserDetails details, @RequestBody LockUnlock lockUnlock) {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+            String date = LocalDateTime.now().format(dateTimeFormatter);
+            Optional<User> emailInRepo = userRepository.findByEmail(lockUnlock.getUser().toLowerCase()).stream().findFirst();
+            User user = null;
+            Map<String, String> map = new HashMap<>();
+            Set<Group> list = emailInRepo.get().getRolesToStore();
+            List<Group> adminPresent = list.stream().filter(x -> x.getRole().equals("ROLE_ADMINISTRATOR")).collect(Collectors.toList());
+            if (!adminPresent.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't lock the ADMINISTRATOR!");
+            }
+            if (emailInRepo.isPresent()) {
+                user = emailInRepo.get();
+
+            }
+            new UserDetailsImpl(user);
+            if (user != null && lockUnlock.getOperation().equals("UNLOCK")) {
+                if (!user.isAccountNonLocked()) {
+                    user.setAccountNonLocked(true);
+                    user.setFailedAttempt(0);
+                    userRepository.save(user);
+
+
+                    logRepository.save(new Log(date, "UNLOCK_USER", details.getUsername(), "Unlock user " + user.getEmail(), "/api/admin/user/access"));
+                    map = Map.of("status", "User " + user.getEmail() + " unlocked!");
+                }
+            }
+
+            if (user != null && lockUnlock.getOperation().equals("LOCK")) {
+                if (user.isAccountNonLocked()) {
+                    user.setAccountNonLocked(false);
+                    userRepository.save(user);
+                    logRepository.save(new Log(date, "LOCK_USER", details.getUsername(), "Lock user " + user.getEmail(), "/api/admin/user/access"));
+                    map = Map.of("status", "User " + user.getEmail() + " locked!");
+                    return new ResponseEntity<>(map, HttpStatus.OK);
+
+                }
+            }
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+
+        @GetMapping("api/security/events")
+        @Secured({"ROLE_AUDITOR"})
+        public ResponseEntity<?> logForAudit(@AuthenticationPrincipal UserDetails details) {
+            Iterable<Log> logOptional = logRepository.findAll();
+
+            return new ResponseEntity<>(logOptional, HttpStatus.OK);
+        }
+
+        @PutMapping("api/admin/user/role")
+        @Secured({"ROLE_ADMINISTRATOR"})
+        public ResponseEntity<?> rolesUpdate(@AuthenticationPrincipal UserDetails details,
+                                             @RequestBody(required = false) RoleUpdate roleUpdate) {
+
+            if (roleUpdate.getRole().equals(null)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not found!");
+            }
+            Optional<User> emailInRepo = userRepository.findByEmail(roleUpdate.getUser().toLowerCase()).stream().findFirst();
+            User userToReturn = null;
+
+            if (!emailInRepo.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!");
+            }
+            if (emailInRepo.isPresent()) {
+                userToReturn = emailInRepo.get();
+                Set<Group> list = emailInRepo.get().getRolesToStore();
+
+                List<Group> adminPresent = list.stream().filter(x -> x.getRole().equals("ROLE_ADMINISTRATOR")).collect(Collectors.toList());
+                List<Group> accountantPresent = list.stream().filter(x -> x.getRole().equals("ROLE_ACCOUNTANT")).collect(Collectors.toList());
+                List<Group> userPresent = list.stream().filter(x -> x.getRole().equals("ROLE_USER")).collect(Collectors.toList());
+                List<Group> auditorPresent = list.stream().filter(x -> x.getRole().equals("ROLE_AUDITOR")).collect(Collectors.toList());
+
+                if (roleUpdate.getOperation().equals("REMOVE")
+                ) {
+                    int count = 0;
+                    for (Group gr : list
+                    ) {
+                        if (gr.getRole().equals("ROLE_" + roleUpdate.getRole())) {
+                            count++;
+                        }
+
+                    }
+                    if (count == 0) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user does not have a role!");
+                    }
+                }
+
+                if (!roleUpdate.getRole().equals("ADMINISTRATOR") && !roleUpdate.getRole().equals("ACCOUNTANT")
+                        && !roleUpdate.getRole().equals("USER") && !roleUpdate.getRole().equals("AUDITOR")) {
+
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found!");
+                }
+
+                if (roleUpdate.getRole().equals("ADMINISTRATOR") && roleUpdate.getOperation().equals("REMOVE")) {
+
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't remove ADMINISTRATOR role!");
+                }
+                if (roleUpdate.getRole().equals("ADMINISTRATOR")) {
+
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The user cannot combine administrative and business roles!");
+                }
+                if (!adminPresent.isEmpty()
+                ) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user cannot combine administrative and business roles!");
+                }
+                if (roleUpdate.getOperation().equals("REMOVE") && list.size() == 1
+                ) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user must have at least one role!");
+                }
+    //**********************************************
+    //            if (adminPresent.isEmpty() && userPresent.isEmpty() && accountantPresent.isEmpty()
+    //
+    //                    && roleUpdate.getOperation().equals("GRANT")
+    //                    && roleUpdate.getRole().equals("ACCOUNTANT")) {
+    //
+    //                userToReturn.addRole(new Group("ROLE_ACCOUNTANT"));
+    //                userRepository.saveAndFlush(userToReturn);
+    //                userToReturn.setRoles();
+    //
+    //                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+    //
+    //                String date = LocalDateTime.now().format(dateTimeFormatter);
+    //                logRepository.save(new Log(date, "GRANT_ROLE", details.getUsername(),
+    //                        "Grant role ACCOUNTANT to " + userToReturn.getEmail(), "/api/admin/user/role"));
+    //
+    //                return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+    //            }
+    //
+    //            if (accountantPresent.isEmpty() && userPresent.isEmpty()
+    //
+    //                    && roleUpdate.getOperation().equals("GRANT")
+    //                    && roleUpdate.getRole().equals("USER")) {
+    //
+    //                userToReturn.addRole(new Group("ROLE_USER"));
+    //                userRepository.saveAndFlush(userToReturn);
+    //                userToReturn.setRoles();
+    //
+    //                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+    //
+    //                String date = LocalDateTime.now().format(dateTimeFormatter);
+    //                logRepository.save(new Log(date, "GRANT_ROLE", details.getUsername(),
+    //                        "Grant role USER to " + userToReturn.getEmail(), "/api/admin/user/role"));
+    //
+    //                return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+    //            }
+    //*********************************************
+                if (accountantPresent.isEmpty() && roleUpdate.getOperation().equals("GRANT")
+                        && roleUpdate.getRole().equals("ACCOUNTANT")) {
+
+                    userToReturn.addRole(new Group("ROLE_ACCOUNTANT"));
+                    userRepository.saveAndFlush(userToReturn);
+                    userToReturn.setRoles();
+
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                    String date = LocalDateTime.now().format(dateTimeFormatter);
+                    logRepository.save(new Log(date, "GRANT_ROLE", details.getUsername(),
+                            "Grant role ACCOUNTANT to " + userToReturn.getEmail(), "/api/admin/user/role"));
+
+                    return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+                }
+
+                if (userPresent.isEmpty() && roleUpdate.getOperation().equals("GRANT")
+                        && roleUpdate.getRole().equals("USER")) {
+                    userToReturn.addRole(new Group("ROLE_USER"));
+                    userRepository.saveAndFlush(userToReturn);
+                    userToReturn.setRoles();
+
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                    String date = LocalDateTime.now().format(dateTimeFormatter);
+                    logRepository.save(new Log(date, "GRANT_ROLE", details.getUsername(),
+                            "Grant role USER to " + userToReturn.getEmail(), "/api/admin/user/role"));
+                    return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+
+                }
+
+                if (auditorPresent.isEmpty() && roleUpdate.getOperation().equals("GRANT")
+                        && roleUpdate.getRole().equals("AUDITOR")) {
+                    userToReturn.addRole(new Group("ROLE_AUDITOR"));
+                    userRepository.saveAndFlush(userToReturn);
+                    userToReturn.setRoles();
+
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                    String date = LocalDateTime.now().format(dateTimeFormatter);
+                    logRepository.save(new Log(date, "GRANT_ROLE", details.getUsername(),
+                            "Grant role AUDITOR to " + userToReturn.getEmail(), "/api/admin/user/role"));
+                    return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+
+                }
+
+                if (!userPresent.isEmpty()
+                        && roleUpdate.getRole().equals("USER") && roleUpdate.getOperation().equals("REMOVE")
+                ) {
+
+                    userToReturn.removeRole(userPresent.get(0));
+                    userRepository.saveAndFlush(userToReturn);
+                    userToReturn.setRoles();
+
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                    String date = LocalDateTime.now().format(dateTimeFormatter);
+                    logRepository.save(new Log(date, "REMOVE_ROLE", details.getUsername(),
+                            "Remove role USER from " + userToReturn.getEmail(), "/api/admin/user/role"));
+                    return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+
+                }
+
+                if (!accountantPresent.isEmpty()
+                        && roleUpdate.getRole().equals("ACCOUNTANT") && roleUpdate.getOperation().equals("REMOVE")
+                ) {
+
+                    userToReturn.removeRole(accountantPresent.get(0));
+                    userRepository.saveAndFlush(userToReturn);
+                    userToReturn.setRoles();
+
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                    String date = LocalDateTime.now().format(dateTimeFormatter);
+                    logRepository.save(new Log(date, "REMOVE_ROLE", details.getUsername(),
+                            "Remove role ACCOUNTANT from " + userToReturn.getEmail(), "/api/admin/user/role"));
+                    return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+
+                }
+
+                if (!auditorPresent.isEmpty()
+                        && roleUpdate.getRole().equals("AUDITOR") && roleUpdate.getOperation().equals("REMOVE")
+                ) {
+
+                    userToReturn.removeRole(accountantPresent.get(0));
+                    userRepository.saveAndFlush(userToReturn);
+                    userToReturn.setRoles();
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                    String date = LocalDateTime.now().format(dateTimeFormatter);
+                    logRepository.save(new Log(date, "REMOVE_ROLE", details.getUsername(),
+                            "Remove role AUDITOR from " + userToReturn.getEmail(), "/api/admin/user/role"));
+
+                    return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+
+                }
+            }
+
+            userRepository.saveAndFlush(userToReturn);
+            userToReturn.setRoles();
+            return new ResponseEntity<>(userToReturn, HttpStatus.OK);
+        }
+
+        @DeleteMapping("api/admin/user")
+        @Secured({"ROLE_ADMINISTRATOR"})
+        public ResponseEntity<?> delete(@AuthenticationPrincipal UserDetails details) {
+
+            return new ResponseEntity<>("e-mail?", HttpStatus.OK);
+        }
+
+        @DeleteMapping("api/admin/user/{email}")
+        @Secured({"ROLE_ADMINISTRATOR"})
+        public ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserDetails details,
+                                            @PathVariable @Pattern(regexp = "[a-zA-Z0-9._%+-]+@acme.com") String email) {
+            if (userRepository.findByEmail(email.toLowerCase()).isPresent()) {
+                Set<Group> list = userRepository
+                        .findByEmail(email.toLowerCase()).get().getRolesToStore();
+
+                for (Group gr : list
+                ) {
+                    if (gr.getRole().contains("ROLE_ADMINISTRATOR")) {
+
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't remove ADMINISTRATOR role!");
+                    }
+                }
+
+            }
+
+            List<User> user = userRepository.deleteByEmail(email.toLowerCase());
+            if (user.size() == 0) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Trying to delete non existing user!");
+            }
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+            String date = LocalDateTime.now().format(dateTimeFormatter);
+            logRepository.save(new Log(date, "DELETE_USER", details.getUsername(),
+                    user.get(0).getEmail(), "/api/admin/user"));
+
+            user.forEach(users -> users.setRoles());
+
+            Map<String, String> map = Map.of("user", user.get(0).getEmail(), "status", "Deleted successfully!");
+
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+
+
+        @GetMapping("api/admin/user")
+        @Secured({"ROLE_ADMINISTRATOR"})
+        public ResponseEntity<?> allUsersInformation(@AuthenticationPrincipal UserDetails details) {
+            Iterable<User> userRepositoryAll = userRepository.findAll();
+            List<User> target = new ArrayList<>();
+            userRepositoryAll.forEach(target::add);
+            target.forEach(user -> user.setRoles());
+
+            return new ResponseEntity<>(target, HttpStatus.OK);
+        }
+
+        @PostMapping(value = "api/acct/payments", consumes = {MediaType.APPLICATION_JSON_VALUE})
+        @Transactional
+        @Secured("ROLE_ACCOUNTANT")
+        public ResponseEntity<?> createPayments(@RequestBody(required = false) Payments[] payments) {
+
+    //        paymentsRepository.deleteAll();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+
+            for (Payments item : payments
+            ) {
+                try {
+                    YearMonth date = YearMonth.parse(item.getPeriod(), dateTimeFormatter);
+                    System.out.println(date);
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "incorrect date");
+                }
+
+
+                Optional<User> emailInRepo = userRepository.findByEmail(item.getEmployee().toLowerCase()).stream().findFirst();
+                String employee = item.getEmployee().toLowerCase();
+                Optional<Payments> paymentsOptional = paymentsRepository.findByEmployeeAndAndPeriod(employee, item.getPeriod()).stream().findFirst();
+
+
+                if (paymentsOptional.isPresent()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "dublicated salary period for  " + paymentsOptional.get().getEmployee() + " " + paymentsOptional.get().getPeriod());
+                }
+                if (!emailInRepo.isPresent() || item.getSalary() < 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Error!");
+                }
+
+                if (emailInRepo.isPresent() && item.getSalary() >= 0 && !paymentsOptional.isPresent()) {
+                    item.setEmployee(item.getEmployee().toLowerCase());
+                    paymentsRepository.save(item);
+                    Iterable<Payments> paymentsIterable = paymentsRepository.findAll();
+                    paymentsIterable.forEach(System.out::println);
+                }
+
+            }
+
+
+            Map<String, String> map = Map.of("status", "Added successfully!");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+
+        @PutMapping(value = "api/acct/payments", consumes = {MediaType.APPLICATION_JSON_VALUE})
+        @Secured("ROLE_ACCOUNTANT")
+        public ResponseEntity<?> updatePayments(@RequestBody Payments payment) {
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+
+
+            try {
+                YearMonth date = YearMonth.parse(payment.getPeriod(), dateTimeFormatter);
+                System.out.println(date);
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "incorrect date");
+            }
+
+
+            Optional<User> emailInRepo = userRepository.findByEmail(payment.getEmployee().toLowerCase()).stream().findFirst();
+            String employee = payment.getEmployee().toLowerCase();
+            Optional<Payments> paymentsOptional = paymentsRepository.findByEmployeeAndAndPeriod(employee, payment.getPeriod()).stream().findFirst();
+
+
+    //            if (paymentsOptional.isPresent()) {
+    //                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+    //                        "dublicated salary period for  " +paymentsOptional.get().getEmployee()+" "+paymentsOptional.get().getPeriod());
+    //            }
+            if (!emailInRepo.isPresent() || payment.getSalary() < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Error!");
+            }
+            if (!paymentsOptional.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Period or e-mail not correct!");
+            }
+            if (emailInRepo.isPresent() && payment.getSalary() >= 0 && paymentsOptional.isPresent()) {
+    //            payment.setEmployee(payment.getEmployee().toLowerCase());
+                Long id = paymentsOptional.get().getId();
+                Payments paymentsToUpdate = paymentsRepository.findById(id).get();
+                paymentsToUpdate.setSalary(payment.getSalary());
+                paymentsRepository.saveAndFlush(paymentsToUpdate);
+                Iterable<Payments> paymentsIterable = paymentsRepository.findAll();
+                paymentsIterable.forEach(System.out::println);
+            }
+
+
+            Map<String, String> map = Map.of("status", "Updated successfully!");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+
+
+        @PostMapping("api/auth/changepass")
+        @Secured({"ROLE_ACCOUNTANT", "ROLE_USER", "ROLE_ADMINISTRATOR"})
+        public ResponseEntity<?> changePass(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Newpassword
+                new_password) {
+
+            try {
+                new_password.getNew_password().equals("");
+            } catch (NullPointerException e) {
+
+                System.out.println(e.getMessage());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+
+            if (new_password.getNew_password().equals("")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+
+            if (new_password.getNew_password().length() < 12) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password length must be 12 chars minimum!");
+            }
+            for (String item : breachedPasswords
+            ) {
+                if (item.equals(new_password.getNew_password())) {
+
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The password is in the hacker's database!");
+                }
+
+            }
+
+
+            if (encoder.matches(new_password.getNew_password(), userDetails.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The passwords must be different!");
+            }
+
+            long id;
+            Optional<User> user = userRepository.findByEmail(userDetails.getUsername()).stream().findFirst();
+            if (user.isPresent()) {
+                id = user.get().getId();
+            } else {
+                throw new UsernameNotFoundException(String.format("Username [%s] not found", userDetails.getUsername()));
+            }
+
+
+            Optional<User> userById = userRepository.findById(id);
+            if (userById.isPresent()) {
+                User u = userById.get();
+
+                u.setPassword(encoder.encode(new_password.getNew_password()));
+
+    //        user.setEmail(user.getEmail().toLowerCase());
+
+                userRepository.saveAndFlush(u);
+
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+                String date = LocalDateTime.now().format(dateTimeFormatter);
+                logRepository.save(new Log(date, "CHANGE_PASSWORD", u.getEmail(), u.getEmail(), "/api/auth/changepass"));
+
+            }
+
+
+            Map<String, Object> body = new LinkedHashMap<>();
+
+            body.put("email", userDetails.getUsername());
+            body.put("status", "The password has been updated successfully");
+
+            return new ResponseEntity<>(body, HttpStatus.OK);
+
+        }
+
+
+        @PostMapping("api/auth/signup")
+        public ResponseEntity<?> signUp(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody User user) {
+            try {
+                user.getEmail().equals("");
+                user.getName().equals("");
+                user.getLastname().equals("");
+                user.getPassword().equals("");
+            } catch (NullPointerException e) {
+
+                System.out.println(e.getMessage());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "param is null");
+            }
+            if (user.getEmail().equals("") || user.getName().equals("") || user.getLastname().equals("") ||
+                    user.getPassword().equals("")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "param is empty");
+            }
+
+            if (!user.getEmail().contains("@acme.com")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+            if (user.getPassword().length() < 12) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The password length must be at least 12!");
+            }
+            for (String item : breachedPasswords
+            ) {
+                if (item.equals(user.getPassword())) {
+
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The password is in the hacker's database!");
+                }
+
+            }
+
+    //        System.out.println(userRepository.findAll());
+            Iterable<User> userList = userRepository.findAll();
+
+            for (User userw : userList
+            ) {
+                System.out.println(userw.getEmail() + " " + userw.getName());
+            }
+
+    //        System.out.println("found"+  userRepository.findById(29L).get().getEmail());
+
+    //        userRepository.deleteAll();
+
+            Optional<User> email = userRepository.findByEmail(user.getEmail().toLowerCase()).stream().findFirst();
+            if (email.isPresent()) {
+                if ((user.getEmail()).equalsIgnoreCase(email.get().getEmail().toLowerCase())) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User exist!");
+                }
+            }
+
+            Iterable<User> userRepositoryAll = userRepository.findAll();
+            List<User> target = new ArrayList<>();
+            userRepositoryAll.forEach(target::add);
+            if (target.size() > 0) {
+                user.setPassword(encoder.encode(user.getPassword()));
+                user.addRole(new Group("ROLE_USER"));
+                user.setEmail(user.getEmail().toLowerCase());
+            } else {
+                user.setPassword(encoder.encode(user.getPassword()));
+                user.setEmail(user.getEmail().toLowerCase());
+                user.addRole(new Group("ROLE_ADMINISTRATOR"));
+            }
+
+            user.setRoles();
+            userRepository.save(user);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+
+            String date = LocalDateTime.now().format(dateTimeFormatter);
+            logRepository.save(new Log(date, "CREATE_USER", "Anonymous", user.getEmail(), "/api/auth/signup"));
+            return new ResponseEntity<>(user, HttpStatus.OK);
+
+        }
+
+        @GetMapping("api/empl/payment")
+        @Secured({"ROLE_ACCOUNTANT", "ROLE_USER"})
+        public ResponseEntity<?> testAuthentication(@AuthenticationPrincipal UserDetails details,
+                                                    @RequestParam(required = false, name = "period") String period) {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+
+            if (period != null) {
+                try {
+                    YearMonth date = YearMonth.parse(period, dateTimeFormatter);
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "incorrect date");
+                }
+                Optional<Payments> paymentsOptional = paymentsRepository.findByEmployeeAndAndPeriod(details.getUsername(), period);
+                if (paymentsOptional.isPresent()) {
+                    Payments payments = paymentsOptional.get();
+                    System.out.println(details.getUsername());
+                    User userName = userRepository.findByEmail(details.getUsername()).get();
+                    int usd = payments.getSalary() / 100;
+                    int cents = payments.getSalary() - usd * 100;
+                    String salary = String.format("%d dollar(s) %d cent(s)", usd, cents);
+
+                    dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+                    YearMonth date = YearMonth.parse(payments.getPeriod(), dateTimeFormatter);
+                    dateTimeFormatter = DateTimeFormatter.ofPattern("MMMM-yyyy", Locale.ENGLISH);
+
+                    String data = dateTimeFormatter.format(date);
+                    PaymentsToPresent paymentsToPresent = new PaymentsToPresent(salary, userName.getName(), userName.getLastname(), data);
+                    return new ResponseEntity<>(paymentsToPresent, HttpStatus.OK);
+                }
+            }
+            List<Payments> paymentsOptional = paymentsRepository.findByEmployee(details.getUsername());
+
+            List<PaymentsToPresent> paymentsToPresentList = new ArrayList<>();
+            for (Payments payment : paymentsOptional
+            ) {
+                User userName = userRepository.findByEmail(details.getUsername()).get();
+                int usd = payment.getSalary() / 100;
+                int cents = payment.getSalary() - usd * 100;
+                String salary = String.format("%d dollar(s) %d cent(s)", usd, cents);
+
+                dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+                YearMonth date = YearMonth.parse(payment.getPeriod(), dateTimeFormatter);
+                dateTimeFormatter = DateTimeFormatter.ofPattern("MMMM-yyyy", Locale.ENGLISH);
+
+                String data = dateTimeFormatter.format(date);
+                PaymentsToPresent paymentsToPresent = new PaymentsToPresent(salary, userName.getName(), userName.getLastname(), data);
+                paymentsToPresentList.add(paymentsToPresent);
+            }
+            Collections.reverse(paymentsToPresentList);
+            return new ResponseEntity<>(paymentsToPresentList, HttpStatus.OK);
+        }
+    }
+
+
+    //for (Payments item : payments
+    //        ) {
+    //        YearMonth date = YearMonth.parse(item.getPeriod(), dateTimeFormatter);
+    //
+    //        System.out.println(date);
+    //        Optional<User> emailInRepo = userRepository.findByEmail(item.getEmployee().toLowerCase()).stream().findFirst();
+    //        if (!paymentsList.isEmpty()) {
+    //
+    //        Map<String, String> map = paymentsList.stream().collect(Collectors.toMap(
+    //        p -> p.getPeriod(),
+    //        p -> p.getEmployee()));
+    //
+    //        Optional<Map.Entry<String, String>> filteredbyPeriod = map.entrySet().stream().filter(x -> x.getValue().equals(item.getEmployee()) &&
+    //        x.getKey().equals(item.getPeriod())).findFirst();
+    //
+    //
+    //        if (emailInRepo.isPresent() && item.getSalary() >= 0 && !filteredbyPeriod.isPresent()) {
+    //        paymentsList.add(item);
+    //        map.clear();
+    //        }
+    //        } else if (emailInRepo.isPresent() && item.getSalary() >= 0) {
+    //        paymentsList.add(item);
+    //        }
+    //        }
+  learner_created: true
+- name: src/account/RestAuthenticationEntryPoint.java
+  visible: true
+  text: |+
+    package account;
+
+    import org.springframework.beans.factory.InitializingBean;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.security.core.Authentication;
+    import org.springframework.security.core.AuthenticationException;
+    import org.springframework.security.core.context.SecurityContextHolder;
+    import org.springframework.security.web.AuthenticationEntryPoint;
+    import org.springframework.stereotype.Component;
+    import org.springframework.util.Assert;
+    import org.springframework.web.server.ResponseStatusException;
+
+    import javax.servlet.ServletException;
+    import javax.servlet.http.HttpServletRequest;
+    import javax.servlet.http.HttpServletResponse;
+    import java.io.IOException;
+    import java.time.LocalDate;
+    import java.time.LocalDateTime;
+    import java.time.format.DateTimeFormatter;
+    import java.util.*;
+    import java.util.stream.Collectors;
+
+    import static java.lang.System.out;
+
+
+    @Component
+    public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+        @Autowired
+        LogRepository logRepository;
+
+        @Autowired
+        UserRepository userRepository;
+        @Autowired
+        private UserDetailsServiceImpl userService;
+
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss");
+            String date = LocalDateTime.now().format(dateTimeFormatter);
+            Enumeration en = request.getHeaderNames();
+
+            String code = new String();
+
+            while (en.hasMoreElements()) {
+                //get header name Accept,Accept-Charset,Authorization,Connection,Host etc.
+                String headerName = (String) en.nextElement(); //nextElement() returns Object need type cast
+                //get the value of the headerName
+                String headerValue = request.getHeader(headerName);
+                if (headerValue.contains("Basic")) {
+                    code = headerValue;
+                    break;
+                }
+
+            }
+            String email = new String();
+            if (code.length() > 0) {
+                code = code.substring(6, code.length()).trim();
+
+                byte[] decodedBytes = Base64.getDecoder().decode(code);
+                String decodedString = new String(decodedBytes);
+                String[] ar = decodedString.split(":");
+
+                email = decodedString.equals(":") ? "null" : ar[0] == "" ? "null" : ar[0];
+    //            logRepository.save(new Log(date, "LOGIN_FAILED", email, request.getRequestURI(), request.getRequestURI()));
+            } else {
+                email = "null";
+            }
+
+            Optional<User> emailInRepo = userRepository.findByEmail(email.toLowerCase()).stream().findFirst();
+            User user = null;
+
+            List<Group> adminPresent = new ArrayList<>();
+
+            if (emailInRepo.isPresent()) {
+                user = emailInRepo.get();
+                Set<Group> list = emailInRepo.get().getRolesToStore();
+                 adminPresent = list.stream().filter(x -> x.getRole().equals("ROLE_ADMINISTRATOR"))
+                        .collect(Collectors.toList());
+            }
+            if (!emailInRepo.isPresent() && !email.equals("null")) {
+                logRepository.save(new Log(date, "LOGIN_FAILED", email, request.getRequestURI(), request.getRequestURI()));
+            }
+
+            if (user != null) {
+                if (user.isAccountNonLocked()) {
+                    if (userService.getUser().getFailedAttempt() <= UserDetailsServiceImpl.MAX_FAILED_ATTEMPTS) {
+                        userService.increaseFailedAttempts();
+                        logRepository.save(new Log(date, "LOGIN_FAILED", email, request.getRequestURI(), request.getRequestURI()));
+                    }
+                    if (userService.getUser().getFailedAttempt() == UserDetailsServiceImpl.MAX_FAILED_ATTEMPTS) {
+                        logRepository.save(new Log(date, "BRUTE_FORCE", email, request.getRequestURI(), request.getRequestURI()));
+                    }
+                    if (userService.getUser().getFailedAttempt()
+                            == UserDetailsServiceImpl.MAX_FAILED_ATTEMPTS&&adminPresent.isEmpty()) {
+                        userService.lock();
+                        logRepository.save(new Log(date, "LOCK_USER", email, "Lock user " + email, request.getRequestURI()));
+                    }
+                }
+
+            }
+
+
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+
+        }
+    }
+
+  learner_created: true
+- name: src/account/WebSecurityConfigurerImpl.java
+  visible: true
+  text: |+
+    package account;
+
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.http.HttpMethod;
+    import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+    import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+    import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+    import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+    import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+    import org.springframework.security.config.http.SessionCreationPolicy;
+    import org.springframework.security.core.AuthenticationException;
+    import org.springframework.security.core.userdetails.UserDetailsService;
+    import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+    import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.security.web.AuthenticationEntryPoint;
+    import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+    import javax.servlet.ServletException;
+    import javax.servlet.annotation.WebListener;
+    import javax.servlet.http.HttpServletRequest;
+    import javax.servlet.http.HttpServletResponse;
+    import java.io.IOException;
+
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity (prePostEnabled = true, securedEnabled = true)
+    @WebListener
+    //        (debug=true)
+    public class WebSecurityConfigurerImpl extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        UserDetailsServiceImpl userDetailsService;
+        @Autowired
+        RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.userDetailsService(userDetailsService).passwordEncoder(getEncoder());
+
+        }
+
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.httpBasic()
+                    .authenticationEntryPoint(restAuthenticationEntryPoint)
+                    .and()
+                    .csrf().disable().headers().frameOptions().disable()
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers(HttpMethod.GET, "/api/empl/payment").authenticated()
+                    .antMatchers(HttpMethod.POST, "/api/auth/changepass").authenticated()
+                    .mvcMatchers(HttpMethod.PUT, "/api/admin/user/role").authenticated()
+                    .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+                    .and()
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                    .exceptionHandling()
+                    .accessDeniedHandler(accessDeniedHandler());
+    //                .and()
+    //                .formLogin()
+    //                .failureHandler(authenticationFailureHandler())
+    //                .failureHandler(loginFailureHandler())
+    //                .successHandler(loginSuccessHandler())  ;
+
+
+        }
+
+        @Bean
+        public PasswordEncoder getEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+
+        @Bean
+        CustomAccessDeniedHandler accessDeniedHandler() {
+            return new CustomAccessDeniedHandler();
+        }
+
+    //    @Bean
+    //    public AuthenticationFailureHandler authenticationFailureHandler() {
+    //        return new CustomAuthenticationFailureHandler();
+    //    }
+    //
+    //   @Bean
+    //    public  CustomLoginFailureHandler loginFailureHandler(){
+    //        return new CustomLoginFailureHandler();
+    //    }
+    //
+    //    @Bean
+    //   public CustomLoginSuccessHandler loginSuccessHandler()
+    //    {return  new CustomLoginSuccessHandler();}
+
+
+    }
+
+  learner_created: true
+- name: src/account/CustomLoginSuccessHandler.java
+  visible: true
+  text: |-
+    //package account;
+    //
+    //import org.springframework.beans.factory.annotation.Autowired;
+    //import org.springframework.security.core.Authentication;
+    //import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+    //import org.springframework.stereotype.Component;
+    //
+    //import javax.servlet.ServletException;
+    //import javax.servlet.http.HttpServletRequest;
+    //import javax.servlet.http.HttpServletResponse;
+    //import java.io.IOException;
+    //
+    //@Component
+    //public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+    //
+    //    @Autowired
+    //    private UserDetailsServiceImpl userService;
+    //
+    //    @Override
+    //    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+    //                                        Authentication authentication) throws IOException, ServletException {
+    //        UserDetailsImpl userDetails =  (UserDetailsImpl) authentication.getPrincipal();
+    //        User user = userDetails.getUser();
+    //        if (user.getFailedAttempt() > 0) {
+    //            userService.resetFailedAttempts();
+    //        }
+    //
+    //        super.onAuthenticationSuccess(request, response, authentication);
+    //    }
+    //
+    //}
+  learner_created: true
+- name: src/account/PaymentsRepository.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.data.repository.CrudRepository;
+    import org.springframework.transaction.annotation.Transactional;
+
+    import java.util.List;
+    import java.util.Optional;
+
+    @Transactional
+    public interface PaymentsRepository extends CrudRepository<Payments, Long> {
+        Optional<Payments> findByEmployeeAndAndPeriod(String employee, String period);
+
+        List<Payments> findByEmployee(String employee);
+
+        public Payments save(Payments user);
+
+
+        Optional<Payments> findById(Long id);
+
+        void saveAndFlush(Payments u);
+
+
+    }
+  learner_created: true
+- name: src/account/DataLoader.java
+  visible: true
+  text: |-
+    //package account;
+    //
+    //import org.springframework.beans.factory.annotation.Autowired;
+    //import org.springframework.stereotype.Component;
+    //
+    //@Component
+    //public class DataLoader {
+    //
+    //    private GroupRepository groupRepository;
+    //
+    //    @Autowired
+    //    public DataLoader(GroupRepository groupRepository) {
+    //        this.groupRepository = groupRepository;
+    //        createRoles();
+    //    }
+    //
+    //    private void createRoles() {
+    //        try {
+    //            groupRepository.save(new Group("ROLE_ADMINISTRATOR"));
+    //            groupRepository.save(new Group("ROLE_USER"));
+    //            groupRepository.save(new Group("ROLE_ACCOUNTANT"));
+    //        } catch (Exception e) {
+    //
+    //        }
+    //    }
+    //}
+  learner_created: true
+- name: src/account/AuthenticationSuccessEventListener.java
+  visible: true
+  text: |-
+    package account;
+
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.context.ApplicationListener;
+    import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+    import org.springframework.stereotype.Component;
+
+    import javax.servlet.http.HttpServletRequest;
+
+    @Component
+    public class AuthenticationSuccessEventListener implements
+            ApplicationListener<AuthenticationSuccessEvent> {
+
+        @Autowired
+        private HttpServletRequest request;
+        @Autowired
+        private UserDetailsServiceImpl userService;
+
+
+        @Override
+        public void onApplicationEvent(final AuthenticationSuccessEvent e) {
+
+            System.out.println("good");
+
+            UserDetailsImpl userDetails =  (UserDetailsImpl) e.getAuthentication().getPrincipal();
+            User user = userDetails.getUser();
+            if (user.getFailedAttempt() > 0) {
+                userService.resetFailedAttempts();
+            }
+        }
+    }
+  learner_created: true
+- name: src/account/AuthenticationFailureListener.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.context.ApplicationListener;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.security.authentication.LockedException;
+    import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+    import org.springframework.security.core.userdetails.UserDetails;
+    import org.springframework.stereotype.Component;
+    import org.springframework.web.server.ResponseStatusException;
+
+    import javax.servlet.http.HttpServletRequest;
+    import java.time.LocalDate;
+    import java.time.LocalDateTime;
+    import java.time.format.DateTimeFormatter;
+    import java.util.Base64;
+    import java.util.Enumeration;
+    import java.util.Optional;
+
+    @Component
+    public class AuthenticationFailureListener implements
+            ApplicationListener<AuthenticationFailureBadCredentialsEvent> {
+
+        @Autowired
+        private HttpServletRequest request;
+        @Autowired
+        LogRepository logRepository;
+
+        @Autowired
+        UserRepository userRepository;
+        @Autowired
+        private UserDetailsServiceImpl userService;
+
+        @Override
+        public void onApplicationEvent(AuthenticationFailureBadCredentialsEvent e) {
+            System.out.println("bad");
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String date = LocalDateTime.now().format(dateTimeFormatter);
+            Enumeration en1 = request.getHeaderNames();
+
+            String code1 = new String();
+
+            while (en1.hasMoreElements()) {
+                //get header name Accept,Accept-Charset,Authorization,Connection,Host etc.
+                String headerName = (String) en1.nextElement(); //nextElement() returns Object need type cast
+                //get the value of the headerName
+                String headerValue = request.getHeader(headerName);
+                if (headerValue.contains("Basic")) {
+                    code1 = headerValue; break;
+                }
+
+            }
+
+            String email = new String();
+            if (code1.length() > 0) {
+                code1 = code1.substring(6, code1.length()).trim();
+
+                byte[] decodedBytes = Base64.getDecoder().decode(code1);
+                String decodedString = new String(decodedBytes);
+                String[] ar = decodedString.split(":");
+
+                email = decodedString.equals(":") ? "null" : ar[0] == "" ? "null" : ar[0];
+    //            logRepository.save(new Log(date, "LOGIN_FAILED", email, request.getRequestURI(), request.getRequestURI()));
+            } else {
+                email = "null";
+            }
+
+            Optional<User> emailInRepo = userRepository.findByEmail(email.toLowerCase()).stream().findFirst();
+            User user = null;
+
+
+            if (emailInRepo.isPresent()) {
+                user = emailInRepo.get();
+            }
+
+
+    //        if (user != null) {
+    //            if (user.isAccountNonLocked()) {
+    //                if (userService.getUser().getFailedAttempt() < UserDetailsServiceImpl.MAX_FAILED_ATTEMPTS - 1) {
+    //                    userService.increaseFailedAttempts(); logRepository.save(new Log(date, "LOGIN_FAILED", email, request.getRequestURI(), request.getRequestURI()));
+    //                } else {
+    //                    userService.lock(); logRepository.save(new Log(date, "LOCK_USER", email, request.getRequestURI(), request.getRequestURI()));
+    //                }
+    //            }
+    //
+    //        }
+
+
+        }
+    }
+  learner_created: true
+- name: src/account/RestAccessDeniedHandler.java
+  visible: true
+  text: |
+    //package account;
+    //
+    //import com.fasterxml.jackson.databind.ObjectMapper;
+    //import org.springframework.security.access.AccessDeniedException;
+    //import org.springframework.security.web.access.AccessDeniedHandler;
+    //import org.springframework.stereotype.Component;
+    //
+    //import javax.servlet.ServletException;
+    //import javax.servlet.http.HttpServletRequest;
+    //import javax.servlet.http.HttpServletResponse;
+    //import java.io.IOException;
+    //import java.io.OutputStream;
+    //import java.time.LocalDateTime;
+    //import java.util.HashMap;
+    //import java.util.Map;
+    //
+    //
+    //public class RestAccessDeniedHandler implements AccessDeniedHandler {
+    //
+    //    @Override
+    //    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException, ServletException, IOException {
+    //
+    //        Map<String,Object> response = new HashMap<>();
+    //        response.put("status",httpServletResponse.getStatus());
+    //        response.put("message","unauthorized api access");
+    //        response.put("time", LocalDateTime.now());
+    //
+    //        //httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    //        httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    //        OutputStream out = httpServletResponse.getOutputStream();
+    //        ObjectMapper mapper = new ObjectMapper();
+    //        mapper.writerWithDefaultPrettyPrinter().writeValue(out,response);
+    //        //mapper.writeValue(out, response);
+    //
+    //        out.flush();
+    //    }
+    //}
+  learner_created: true
+- name: src/account/LockUnlock.java
+  visible: true
+  text: |
+    package account;
+
+    public class LockUnlock {
+
+      private   String user;
+        private String operation;
+
+        public LockUnlock() {
+        }
+
+        public LockUnlock(String user, String operation) {
+            this.user = user;
+            this.operation = operation;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+        }
+
+        public String getOperation() {
+            return operation;
+        }
+
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+    }
+  learner_created: true
+- name: src/account/UserDetailsImpl.java
+  visible: true
+  text: |
+    package account;
+
+    import org.springframework.security.core.GrantedAuthority;
+    import org.springframework.security.core.authority.SimpleGrantedAuthority;
+    import org.springframework.security.core.userdetails.UserDetails;
+
+    import java.util.ArrayList;
+    import java.util.Collection;
+    import java.util.List;
+    import java.util.Set;
+
+    public class UserDetailsImpl implements UserDetails {
+        private final String username;
+        private final String password;
+        private final List<GrantedAuthority> rolesAndAuthorities;
+
+        public User getUser() {
+            return user;
+        }
+
+        private final User user;
+        public UserDetailsImpl(User user) {
+            username = user.getEmail();
+            password = user.getPassword();
+            rolesAndAuthorities = new ArrayList<>();
+            this.user = user;
+            Set<Group> userRoles = user.getRolesToStore();
+            for (Group group : userRoles
+            ) {
+                rolesAndAuthorities.add(new SimpleGrantedAuthority(group.getRole()));
+            }
+        }
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return rolesAndAuthorities;
+        }
+
+        @Override
+        public String getPassword() {
+            return password;
+        }
+
+        @Override
+        public String getUsername() {
+            return username;
+        }
+
+        // 4 remaining methods that just return true
+        @Override
+        public boolean isAccountNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isAccountNonLocked() {
+            return user.isAccountNonLocked();
+        }
+
+        @Override
+        public boolean isCredentialsNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
+        }
+    }
+  learner_created: true
+- name: src/account/CustomAuthenticationFailureHandler.java
+  visible: true
+  text: |
+    //package account;
+    //
+    //import com.fasterxml.jackson.databind.ObjectMapper;
+    //import org.springframework.http.HttpStatus;
+    //import org.springframework.security.core.AuthenticationException;
+    //import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+    //
+    //import javax.servlet.ServletException;
+    //import javax.servlet.http.HttpServletRequest;
+    //import javax.servlet.http.HttpServletResponse;
+    //import java.io.IOException;
+    //import java.io.OutputStream;
+    //import java.util.Calendar;
+    //import java.util.HashMap;
+    //import java.util.Map;
+    //
+    //public class CustomAuthenticationFailureHandler
+    //        implements AuthenticationFailureHandler {
+    //
+    //    private ObjectMapper objectMapper = new ObjectMapper();
+    //
+    //    @Override
+    //    public void onAuthenticationFailure(
+    //            HttpServletRequest request,
+    //            HttpServletResponse httpServletResponse,
+    //            AuthenticationException exception)
+    //            throws IOException, ServletException {
+    //
+    //        Map<String,Object> response = new HashMap<>();
+    //        response.put("status",403);
+    //        response.put("message","unauthorized api access");
+    ////        response.put("time", LocalDateTime.now());
+    //
+    //        httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    ////        httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    //        OutputStream out = httpServletResponse.getOutputStream();
+    //        ObjectMapper mapper = new ObjectMapper();
+    //        mapper.writerWithDefaultPrettyPrinter().writeValue(out,response);
+    //        //mapper.writeValue(out, response);
+    //
+    //        out.flush();
+    //    }
+    //}
+  learner_created: true
+- name: src/account/PaymentsToPresent.java
+  visible: true
+  text: |
+    package account;
+
+    public class PaymentsToPresent {
+
+        private String name;
+        private String lastname;
+        private String period;
+
+        private String salary;
+
+        public PaymentsToPresent() {
+        }
+
+        public PaymentsToPresent(String salary, String name, String lastname, String period) {
+            this.salary = salary;
+            this.name = name;
+            this.lastname = lastname;
+            this.period = period;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getLastname() {
+            return lastname;
+        }
+
+        public void setLastname(String lastname) {
+            this.lastname = lastname;
+        }
+
+        public String getPeriod() {
+            return period;
+        }
+
+        public void setPeriod(String period) {
+            this.period = period;
+        }
+
+        public String getSalary() {
+            return salary;
+        }
+
+        public void setSalary(String salary) {
+            this.salary = salary;
+        }
+    }
+  learner_created: true
+- name: src/account/User.java
+  visible: true
+  text: |
+    package account;
+
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import org.springframework.stereotype.Component;
+
+    import javax.persistence.*;
+    import javax.validation.constraints.NotEmpty;
+    import javax.validation.constraints.NotNull;
+    import javax.validation.constraints.Size;
+    import java.util.*;
+
+    @Component
+    @Entity
+    @Table(name = "savedUs")
+    public class User {
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        @Column(name = "password")
+        @Size(min = 12, message = "The password length must be at least 12 chars!")
+        private String password;
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "id", nullable = false)
+        private Long id;
+
+        @Column(name = "name")
+        @NotNull
+        @NotEmpty
+        private String name;
+
+        @Column(name = "lastname")
+        @NotNull
+        @NotEmpty
+        private String lastname;
+
+        @Column(name = "email")
+        @NotNull
+        @NotEmpty
+        private String email;
+
+        @Transient
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        private List<String> roles = new ArrayList<>();
+
+        @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+        @JoinTable(name = "user_group",
+                joinColumns = @JoinColumn(name = "user_id",
+                        referencedColumnName = "id"),
+                inverseJoinColumns = @JoinColumn(name = "group_id",
+                        referencedColumnName = "id"))
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        private Set<Group> rolesToStore = new HashSet<>();
+
+
+        @Column(name = "account_non_locked")
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        private boolean accountNonLocked ;
+
+        @Column(name = "failed_attempt")
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        private int failedAttempt;
+
+        public boolean isAccountNonLocked() {
+            return accountNonLocked;
+        }
+
+
+
+        public void setAccountNonLocked(boolean accountNonLocked) {
+            this.accountNonLocked = accountNonLocked;
+        }
+
+        public int getFailedAttempt() {
+            return failedAttempt;
+        }
+
+        public void setFailedAttempt(int failedAttempt) {
+            this.failedAttempt = failedAttempt;
+        }
+
+        public List<String> setRoles() {
+            rolesToStore.forEach(role -> roles.add((role.getRole())));
+            Collections.sort(roles);
+            return roles;
+        }
+
+        public List<String> getRoles() {
+            return roles;
+        }
+
+        public Set<Group> getRolesToStore() {
+            return rolesToStore;
+        }
+
+        public void addRole(Group role) {
+            rolesToStore.add(role);
+        }
+
+        public void removeRole(Group role) {
+            rolesToStore.remove(role);
+        }
+
+        public void setRolesToStore(Set<Group> roles) {
+            this.rolesToStore = roles;
+        }
+
+    //    private String roles = "ROLE_USER";
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public User() {
+            this.setAccountNonLocked(true);
+        }
+
+        public User(String password, Long id, String name, String lastname,
+                    String email, Set<Group> role) {
+            this.password = password;
+            this.id = id;
+            this.name = name;
+            this.lastname = lastname;
+            this.email = email;
+            this.rolesToStore = role;
+            this.setAccountNonLocked(true);
+        }
+
+
+        public User(String password, Long id, String name, String lastname,
+                    String email, Set<Group> rolesToStore, boolean accountNonLocked,
+                    int failedAttempt) {
+            this.password = password;
+            this.id = id;
+            this.name = name;
+            this.lastname = lastname;
+            this.email = email;
+            this.rolesToStore = rolesToStore;
+            this.accountNonLocked = true;
+            this.failedAttempt = failedAttempt;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getLastname() {
+            return lastname;
+        }
+
+        public void setLastname(String lastname) {
+            this.lastname = lastname;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
+  learner_created: true
+- name: src/account/Payments.java
+  visible: true
+  text: |
+    package account;
+
+    import javax.persistence.*;
+    import java.util.Set;
+
+
+    @Entity
+    @Table(name = "payments")
+    public class Payments {
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "id", nullable = false)
+        private Long id;
+
+        @Column(name = "employee")
+        private String employee;
+        @Column(name = "period")
+        private String period;
+    //    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //    @JoinColumn(name="user_id", nullable=false)
+    //    private User user;
+        @Column(name = "salary")
+        private int salary;
+
+
+        public Long getId() {
+            return id;
+        }
+    //    public void setId(Long id) {
+    //        this.id = id;
+    //    }
+
+
+
+        public Payments(String employee, String period, int salary) {
+            this.employee = employee;
+            this.period = period;
+            this.salary = salary;
+        }
+
+        public Payments() {
+        }
+
+        public String getEmployee() {
+            return employee;
+        }
+
+        public void setEmployee(String employee) {
+            this.employee = employee;
+        }
+
+        public String getPeriod() {
+            return period;
+        }
+
+        public void setPeriod(String period) {
+            this.period = period;
+        }
+
+        public int getSalary() {
+            return salary;
+        }
+
+        public void setSalary(int salary) {
+            this.salary = salary;
+        }
+    }
+  learner_created: true
+- name: src/account/RoleUpdate.java
+  visible: true
+  text: |
+    package account;
+
+    public class RoleUpdate {
+
+        private String user;
+        private String role;
+        private String operation;
+
+        public String getUser() {
+            return user;
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
+        }
+
+        public String getOperation() {
+            return operation;
+        }
+
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+
+        public RoleUpdate() {
+        }
+
+        public RoleUpdate(String user, String role, String operation) {
+            this.user = user;
+            this.role = role;
+            this.operation = operation;
+        }
+    }
+  learner_created: true
+- name: src/account/Newpassword.java
+  visible: true
+  text: |
+    package account;
+
+    public class Newpassword {
+        public Newpassword(String new_password) {
+            this.new_password = new_password;
+        }
+
+        public Newpassword() {
+        }
+
+        public String getNew_password() {
+            return new_password;
+        }
+
+        public void setNew_password(String new_password) {
+            this.new_password = new_password;
+        }
+
+        private String new_password;
+    }
+  learner_created: true
+- name: src/account/Group.java
+  visible: true
+  text: |
+    package account;
+
+    import javax.persistence.*;
+    import java.util.HashSet;
+    import java.util.Set;
+
+    @Entity
+    @Table(name = "role")
+    public class Group {
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @Column(name = "id", nullable = false)
+        private Long id;
+
+        @Column(name = "role")
+        private String role;
+
+        @ManyToMany(mappedBy = "rolesToStore" , cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+        private Set<User> users = new HashSet<>();
+
+        public Group() {
+        }
+
+        public Group(String role) {
+            this.role = role;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
+        }
+
+        public Set<User> getUsers() {
+            return users;
+        }
+
+        public void setUsers(Set<User> users) {
+            this.users = users;
+        }
+    }
+  learner_created: true
+- name: src/account/UserRepository.java
+  visible: true
+  text: |
+    package account;
+
+
+    import org.springframework.data.jpa.repository.Modifying;
+    import org.springframework.data.jpa.repository.Query;
+    import org.springframework.data.repository.CrudRepository;
+    import org.springframework.stereotype.Repository;
+
+    import javax.transaction.Transactional;
+    import java.util.List;
+    import java.util.Optional;
+
+
+    @Repository
+
+    public interface UserRepository extends CrudRepository<User, Long> {
+        Optional<User> findByEmail(String username);
+
+
+        public User save(User user);
+
+
+        Optional<User> findById(Long id);
+
+        void saveAndFlush(User u);
+
+        @Transactional
+        public List<User> deleteByEmail(String username);
+
+        @Query("UPDATE User u SET u.failedAttempt = ?1 WHERE u.email = ?2")
+        @Modifying
+        public void updateFailedAttempts(int failAttempts, String email);
+    }
+  learner_created: true
+- name: src/resources/keystore/keystore.p12
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/learn/step/16607#comment
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Sun, 18 Sep 2022 16:09:21 UTC
+record: -1
