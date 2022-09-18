@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - Class AccountServiceTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>Class AccountServiceTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/default-package.html">default-package</a> &gt; AccountServiceTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">1</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">8.337s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">start</td>
+<td class="success">8.337s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>?[1;31m
+Start test 1?[0m
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.7.3)
+
+2022-09-18 18:44:54.159  INFO 10600 --- [    Test worker] account.AccountServiceApplication        : Starting AccountServiceApplication using Java 17.0.3 on nb181 with PID 10600 (started by Anton.Buldigin in D:\Account Service\Account Service\task)
+2022-09-18 18:44:54.163  INFO 10600 --- [    Test worker] account.AccountServiceApplication        : No active profile set, falling back to 1 default profile: &quot;default&quot;
+2022-09-18 18:44:55.637  INFO 10600 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2022-09-18 18:44:55.736  INFO 10600 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 84 ms. Found 4 JPA repository interfaces.
+2022-09-18 18:44:56.747  INFO 10600 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 28852 (https)
+2022-09-18 18:44:56.767  INFO 10600 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2022-09-18 18:44:56.767  INFO 10600 --- [    Test worker] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.65]
+2022-09-18 18:44:56.918  INFO 10600 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2022-09-18 18:44:56.918  INFO 10600 --- [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2696 ms
+2022-09-18 18:44:57.148  INFO 10600 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2022-09-18 18:44:57.445  INFO 10600 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2022-09-18 18:44:57.465  INFO 10600 --- [    Test worker] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:../service_db'
+2022-09-18 18:44:57.699  INFO 10600 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2022-09-18 18:44:57.763  INFO 10600 --- [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.6.10.Final
+2022-09-18 18:44:58.001  INFO 10600 --- [    Test worker] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2022-09-18 18:44:58.159  INFO 10600 --- [    Test worker] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+Hibernate: create table log (id bigint not null, action varchar(255) not null, date varchar(255) not null, object varchar(255) not null, path varchar(255) not null, subject varchar(255) not null, primary key (id))
+Hibernate: create table payments (id bigint not null, employee varchar(255), period varchar(255), salary integer, primary key (id))
+Hibernate: create table role (id bigint not null, role varchar(255), primary key (id))
+Hibernate: create table saved_us (id bigint not null, account_non_locked boolean, email varchar(255) not null, failed_attempt integer, lastname varchar(255) not null, name varchar(255) not null, password varchar(255), primary key (id))
+Hibernate: create table user_group (user_id bigint not null, group_id bigint not null, primary key (user_id, group_id))
+Hibernate: create sequence hibernate_sequence start with 1 increment by 1
+Hibernate: alter table user_group add constraint FKpoxbo9nsrhntve6kq47h8ruio foreign key (group_id) references role
+Hibernate: alter table user_group add constraint FKobnkd6xiswo5v11dbwtwt4r7g foreign key (user_id) references saved_us
+2022-09-18 18:44:59.151  INFO 10600 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2022-09-18 18:44:59.161  INFO 10600 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2022-09-18 18:44:59.729  WARN 10600 --- [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2022-09-18 18:45:00.459  INFO 10600 --- [    Test worker] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 14 endpoint(s) beneath base path '/actuator'
+2022-09-18 18:45:00.556  INFO 10600 --- [    Test worker] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@5da16ed6, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@444720b7, org.springframework.security.web.context.SecurityContextPersistenceFilter@64ba5a71, org.springframework.security.web.header.HeaderWriterFilter@2bc52b08, org.springframework.security.web.authentication.logout.LogoutFilter@c6a1be2, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@696a6506, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2286dfcd, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5f63a6f2, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@529fda9f, org.springframework.security.web.session.SessionManagementFilter@31f4fdc5, org.springframework.security.web.access.ExceptionTranslationFilter@a15e3c1, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@7b897456]
+2022-09-18 18:45:01.434  INFO 10600 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 28852 (https) with context path ''
+2022-09-18 18:45:01.454  INFO 10600 --- [    Test worker] account.AccountServiceApplication        : Started AccountServiceApplication in 7.741 seconds (JVM running for 8.668)
+CN=accountant_service, OU=jet, O=jet, L=mow, ST=mow, C=ru SHA256withRSA
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 7.3.3</a> at 18 сент. 2022 г., 18:45:02</p>
+</div>
+</div>
+</body>
+</html>
