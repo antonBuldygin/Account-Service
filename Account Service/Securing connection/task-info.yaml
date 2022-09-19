@@ -2339,9 +2339,213 @@ files:
   visible: true
   learner_created: true
 feedback_link: https://hyperskill.org/learn/step/16607#comment
-status: Solved
+status: Failed
 feedback:
-  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
-    Academy</a> to continue learning.
-  time: Sun, 18 Sep 2022 16:09:21 UTC
-record: -1
+  message: "Exception in test #1\n\nCannot start Spring application\n\norg.springframework.context.ApplicationContextException:\
+    \ Failed to start bean &#39;webServerStartStop&#39;; nested exception is org.springframework.boot.web.server.WebServerException:\
+    \ Unable to start embedded Tomcat server\r\n\tat org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:181)\r\
+    \n\tat org.springframework.context.support.DefaultLifecycleProcessor.access$200(DefaultLifecycleProcessor.java:54)\r\
+    \n\tat org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:356)\r\
+    \n\tat java.base/java.lang.Iterable.forEach(Iterable.java:75)\r\n\tat org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:155)\r\
+    \n\tat org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:123)\r\
+    \n\tat org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:935)\r\
+    \n\tat org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:586)\r\
+    \n\tat org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:147)\r\
+    \n\tat org.springframework.boot.SpringApplication.refresh(SpringApplication.java:734)\r\
+    \n\tat org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:408)\r\
+    \n\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:308)\r\
+    \n\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)\r\
+    \n\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)\r\
+    \n\tat account.AccountServiceApplication.main(AccountServiceApplication.java:10)\n\
+    \nPlease find below the output of your program during this failed test.\n\n---\n\
+    \n.   ____          _            __ _ _\n /\\\\ / ___&#39;_ __ _ _(_)_ __  __\
+    \ _ \\ \\ \\ \\\n( ( )\\___ | &#39;_ | &#39;_| | &#39;_ \\/ _` | \\ \\ \\ \\\n\
+    \ \\\\/  ___)| |_)| | | | | || (_| |  ) ) ) )\n  &#39;  |____| .__|_| |_|_| |_\\\
+    __, | / / / /\n =========|_|==============|___/=/_/_/_/\n :: Spring Boot ::  \
+    \              (v2.7.3)\n\n2022-09-18 19:18:22.691  INFO 8096 --- [    Test worker]\
+    \ account.AccountServiceApplication        : Starting AccountServiceApplication\
+    \ using Java 17.0.3 on nb181 with PID 8096 (started by Anton.Buldigin in D:\\\
+    Account Service\\Account Service\\task)\n2022-09-18 19:18:22.699  INFO 8096 ---\
+    \ [    Test worker] account.AccountServiceApplication        : No active profile\
+    \ set, falling back to 1 default profile: &quot;default&quot;\n2022-09-18 19:18:25.936\
+    \  INFO 8096 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate :\
+    \ Bootstrapping Spring Data JPA repositories in DEFAULT mode.\n2022-09-18 19:18:26.071\
+    \  INFO 8096 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate :\
+    \ Finished Spring Data repository scanning in 115 ms. Found 4 JPA repository interfaces.\n\
+    2022-09-18 19:18:27.206  INFO 8096 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer\
+    \  : Tomcat initialized with port(s): 28852 (https)\n2022-09-18 19:18:27.227 \
+    \ INFO 8096 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting\
+    \ service [Tomcat]\n2022-09-18 19:18:27.228  INFO 8096 --- [    Test worker] org.apache.catalina.core.StandardEngine\
+    \  : Starting Servlet engine: [Apache Tomcat/9.0.65]\n2022-09-18 19:18:27.401\
+    \  INFO 8096 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       :\
+    \ Initializing Spring embedded WebApplicationContext\n2022-09-18 19:18:27.401\
+    \  INFO 8096 --- [    Test worker] w.s.c.ServletWebServerApplicationContext :\
+    \ Root WebApplicationContext: initialization completed in 4544 ms\n2022-09-18\
+    \ 19:18:27.659  INFO 8096 --- [    Test worker] com.zaxxer.hikari.HikariDataSource\
+    \       : HikariPool-1 - Starting...\n2022-09-18 19:18:28.017  INFO 8096 --- [\
+    \    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start\
+    \ completed.\n2022-09-18 19:18:28.035  INFO 8096 --- [    Test worker] o.s.b.a.h2.H2ConsoleAutoConfiguration\
+    \    : H2 console available at &#39;/h2-console&#39;. Database available at &#39;jdbc:h2:file:../service_db&#39;\n\
+    2022-09-18 19:18:28.288  INFO 8096 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper\
+    \  : HHH000204: Processing PersistenceUnitInfo [name: default]\n2022-09-18 19:18:28.370\
+    \  INFO 8096 --- [    Test worker] org.hibernate.Version                    :\
+    \ HHH000412: Hibernate ORM core version 5.6.10.Final\n2022-09-18 19:18:28.644\
+    \  INFO 8096 --- [    Test worker] o.hibernate.annotations.common.Version   :\
+    \ HCANN000001: Hibernate Commons Annotations {5.1.2.Final}\n2022-09-18 19:18:28.816\
+    \  INFO 8096 --- [    Test worker] org.hibernate.dialect.Dialect            :\
+    \ HHH000400: Using dialect: org.hibernate.dialect.H2Dialect\nHibernate: create\
+    \ table log (id bigint not null, action varchar(255) not null, date varchar(255)\
+    \ not null, object varchar(255) not null, path varchar(255) not null, subject\
+    \ varchar(255) not null, primary key (id))\nHibernate: create table payments (id\
+    \ bigint not null, employee varchar(255), period varchar(255), salary integer,\
+    \ primary key (id))\nHibernate: create table role (id bigint not null, role varchar(255),\
+    \ primary key (id))\nHibernate: create table saved_us (id bigint not null, account_non_locked\
+    \ boolean, email varchar(255) not null, failed_attempt integer, lastname varchar(255)\
+    \ not null, name varchar(255) not null, password varchar(255), primary key (id))\n\
+    Hibernate: create table user_group (user_id bigint not null, group_id bigint not\
+    \ null, primary key (user_id, group_id))\nHibernate: create sequence hibernate_sequence\
+    \ start with 1 increment by 1\nHibernate: alter table user_group add constraint\
+    \ FKpoxbo9nsrhntve6kq47h8ruio foreign key (group_id) references role\nHibernate:\
+    \ alter table user_group add constraint FKobnkd6xiswo5v11dbwtwt4r7g foreign key\
+    \ (user_id) references saved_us\n2022-09-18 19:18:29.865  INFO 8096 --- [    Test\
+    \ worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform\
+    \ implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]\n\
+    2022-09-18 19:18:29.877  INFO 8096 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean\
+    \ : Initialized JPA EntityManagerFactory for persistence unit &#39;default&#39;\n\
+    2022-09-18 19:18:30.487  WARN 8096 --- [    Test worker] JpaBaseConfiguration$JpaWebConfiguration\
+    \ : spring.jpa.open-in-view is enabled by default. Therefore, database queries\
+    \ may be performed during view rendering. Explicitly configure spring.jpa.open-in-view\
+    \ to disable this warning\n2022-09-18 19:18:31.238  INFO 8096 --- [    Test worker]\
+    \ o.s.b.a.e.web.EndpointLinksResolver      : Exposing 14 endpoint(s) beneath base\
+    \ path &#39;/actuator&#39;\n2022-09-18 19:18:31.342  INFO 8096 --- [    Test worker]\
+    \ o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6391d34f,\
+    \ org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@23f9d0ce,\
+    \ org.springframework.security.web.context.SecurityContextPersistenceFilter@2044f708,\
+    \ org.springframework.security.web.header.HeaderWriterFilter@696a6506, org.springframework.security.web.authentication.logout.LogoutFilter@27f6e2c3,\
+    \ org.springframework.security.web.authentication.www.BasicAuthenticationFilter@14e54a35,\
+    \ org.springframework.security.web.savedrequest.RequestCacheAwareFilter@18bab95b,\
+    \ org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@24ffe853,\
+    \ org.springframework.security.web.authentication.AnonymousAuthenticationFilter@53c0424a,\
+    \ org.springframework.security.web.session.SessionManagementFilter@183e64a8, org.springframework.security.web.access.ExceptionTranslationFilter@2862bac6,\
+    \ org.springframework.security.web.access.intercept.FilterSecurityInterceptor@5013c6bc]\n\
+    2022-09-18 19:18:31.880  WARN 8096 --- [    Test worker] ConfigServletWebServerApplicationContext\
+    \ : Exception encountered during context initialization - cancelling refresh attempt:\
+    \ org.springframework.context.ApplicationContextException: Failed to start bean\
+    \ &#39;webServerStartStop&#39;; nested exception is org.springframework.boot.web.server.WebServerException:\
+    \ Unable to start embedded Tomcat server\n2022-09-18 19:18:31.885  INFO 8096 ---\
+    \ [    Test worker] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory\
+    \ for persistence unit &#39;default&#39;\n2022-09-18 19:18:31.890  INFO 8096 ---\
+    \ [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 -\
+    \ Shutdown initiated...\n2022-09-18 19:18:32.185  INFO 8096 --- [    Test worker]\
+    \ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.\n\
+    2022-09-18 19:18:32.189  INFO 8096 --- [    Test worker] o.apache.catalina.core.StandardService\
+    \   : Stopping service [Tomcat]\n2022-09-18 19:18:32.210  INFO 8096 --- [    Test\
+    \ worker] ConditionEvaluationReportLoggingListener : \n\nError starting ApplicationContext.\
+    \ To display the conditions report re-run your application with &#39;debug&#39;\
+    \ enabled.\n2022-09-18 19:18:32.240 ERROR 8096 --- [    Test worker] o.s.boot.SpringApplication\
+    \               : Application run failed\n\norg.springframework.context.ApplicationContextException:\
+    \ Failed to start bean &#39;webServerStartStop&#39;; nested exception is org.springframework.boot.web.server.WebServerException:\
+    \ Unable to start embedded Tomcat server\n\tat org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:181)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat org.springframework.context.support.DefaultLifecycleProcessor.access$200(DefaultLifecycleProcessor.java:54)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:356)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat java.base/java.lang.Iterable.forEach(Iterable.java:75)\
+    \ ~[na:na]\n\tat org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:155)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:123)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:935)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:586)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\tat org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:147)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.SpringApplication.refresh(SpringApplication.java:734)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:408)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:308)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat account.AccountServiceApplication.main(AccountServiceApplication.java:10)\
+    \ ~[main/:na]\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native\
+    \ Method) ~[na:na]\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\
+    \ ~[na:na]\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\
+    \ ~[na:na]\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]\n\
+    \tat org.hyperskill.hstest.stage.SpringTest.startSpring(SpringTest.java:139) ~[hs-test-release-SNAPSHOT.jar:na]\n\
+    \tat org.hyperskill.hstest.stage.SpringTest.launchSpring(SpringTest.java:50) ~[hs-test-release-SNAPSHOT.jar:na]\n\
+    \tat org.hyperskill.hstest.testing.runner.SpringApplicationRunner.launchSpringBootApplication(SpringApplicationRunner.java:20)\
+    \ ~[hs-test-release-SNAPSHOT.jar:na]\n\tat org.hyperskill.hstest.testing.runner.SpringApplicationRunner.setUp(SpringApplicationRunner.java:35)\
+    \ ~[hs-test-release-SNAPSHOT.jar:na]\n\tat org.hyperskill.hstest.testing.TestRun.setUp(TestRun.java:70)\
+    \ ~[hs-test-release-SNAPSHOT.jar:na]\n\tat org.hyperskill.hstest.stage.StageTest.start(StageTest.java:111)\
+    \ ~[hs-test-release-SNAPSHOT.jar:na]\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native\
+    \ Method) ~[na:na]\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\
+    \ ~[na:na]\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\
+    \ ~[na:na]\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]\n\
+    \tat org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.junit.runners.ParentRunner.run(ParentRunner.java:413)\
+    \ ~[junit-4.13.2.jar:4.13.2]\n\tat org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:110)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:38)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:62)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:51)\
+    \ ~[na:na]\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native\
+    \ Method) ~[na:na]\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\
+    \ ~[na:na]\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\
+    \ ~[na:na]\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]\n\
+    \tat org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)\
+    \ ~[na:na]\n\tat org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)\
+    \ ~[na:na]\n\tat org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)\
+    \ ~[na:na]\n\tat org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94)\
+    \ ~[na:na]\n\tat jdk.proxy1/jdk.proxy1.$Proxy2.processTestClass(Unknown Source)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:176)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100)\
+    \ ~[na:na]\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60)\
+    \ ~[na:na]\n\tat org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)\
+    \ ~[na:na]\n\tat org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:133)\
+    \ ~[na:na]\n\tat org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:71)\
+    \ ~[na:na]\n\tat worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)\
+    \ ~[gradle-worker.jar:na]\n\tat worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)\
+    \ ~[gradle-worker.jar:na]\nCaused by: org.springframework.boot.web.server.WebServerException:\
+    \ Unable to start embedded Tomcat server\n\tat org.springframework.boot.web.embedded.tomcat.TomcatWebServer.start(TomcatWebServer.java:229)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.web.servlet.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:43)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:178)\
+    \ ~[spring-context-5.3.22.jar:5.3.22]\n\t... 68 common frames omitted\nCaused\
+    \ by: java.lang.IllegalArgumentException: standardService.connector.startFailed\n\
+    \tat org.apache.catalina.core.StandardService.addConnector(StandardService.java:238)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.springframework.boot.web.embedded.tomcat.TomcatWebServer.addPreviouslyRemovedConnectors(TomcatWebServer.java:282)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\tat org.springframework.boot.web.embedded.tomcat.TomcatWebServer.start(TomcatWebServer.java:213)\
+    \ ~[spring-boot-2.7.3.jar:2.7.3]\n\t... 70 common frames omitted\nCaused by: org.apache.catalina.LifecycleException:\
+    \ Protocol handler start failed\n\tat org.apache.catalina.connector.Connector.startInternal(Connector.java:1077)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:183)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.catalina.core.StandardService.addConnector(StandardService.java:234)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\t... 72 common frames omitted\nCaused\
+    \ by: java.lang.IllegalArgumentException: public key protected PKCS12 not supported\n\
+    \tat org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:71)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:235)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.AbstractEndpoint.bindWithCleanup(AbstractEndpoint.java:1227)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:1313)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:614)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.catalina.connector.Connector.startInternal(Connector.java:1074)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\t... 74 common frames omitted\nCaused\
+    \ by: java.io.IOException: public key protected PKCS12 not supported\n\tat java.base/sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2032)\
+    \ ~[na:na]\n\tat java.base/sun.security.util.KeyStoreDelegator.engineLoad(KeyStoreDelegator.java:221)\
+    \ ~[na:na]\n\tat java.base/java.security.KeyStore.load(KeyStore.java:1473) ~[na:na]\n\
+    \tat org.apache.tomcat.util.security.KeyStoreUtil.load(KeyStoreUtil.java:67) ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\
+    \tat org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:217) ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\
+    \tat org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:207)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.SSLUtilBase.getKeyManagers(SSLUtilBase.java:283)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.SSLUtilBase.createSSLContext(SSLUtilBase.java:247)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\tat org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105)\
+    \ ~[tomcat-embed-core-9.0.65.jar:9.0.65]\n\t... 80 common frames omitted"
+  time: Sun, 18 Sep 2022 16:18:32 UTC
+record: 7
